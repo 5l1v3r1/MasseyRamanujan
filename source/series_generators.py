@@ -120,6 +120,21 @@ class CartesianProductAnShift1(CartesianProductAnGenerator):
         self.function = create_series_from_compact_poly_with_shift1
 
 
+class CartesianProductAnOddOnly(CartesianProductAnGenerator):
+    help_string = 'same as default generator with odd coefficients only'
+
+    def __init__(self):
+        super().__init__()
+
+    def get_iterator(self, poly_a: List[List[int]]) -> Iterator:
+        odd_poly = [[i for i in a if (i % 2) == 1] for a in poly_a]  # for b_n include negative terms
+        return product(*odd_poly)
+
+    def get_num_iterations(self, poly_a: List[List[int]]):
+        odd_poly = [[i for i in a if (i % 2) == 1] for a in poly_a]
+        return super().get_num_iterations(odd_poly)
+
+
 class CartesianProductBnShift2n1(CartesianProductBnGenerator):
     help_string = 'b[n] = m(m(...(x[1]*m + x[0]) + x[2]) + ...) + x[k], where m=2*n+1'
 
@@ -351,13 +366,15 @@ class IntegerFactor(SeriesGeneratorClass):
         ]
 
     def get_num_iterations(self, poly_options):
-        poly_real = [i for i in poly_options[0] if i != 0] + [-i for i in poly_options[0] if i != 0]
+        # poly_real = [i for i in poly_options[0] if i != 0] + [-i for i in poly_options[0] if i != 0]
+        poly_real = [-i for i in poly_options[0] if i != 0]  # disable positive options for bn
         return binomial(len(self.factors) + self.deg - 1, self.deg) * len(poly_real)
 
     def get_iterator(self, poly_options):
         factor_indices = [i for i in range(len(self.factors))]
         permutations = combinations_with_replacement(factor_indices, self.deg)
-        poly_real = [i for i in poly_options[0] if i != 0] + [-i for i in poly_options[0] if i != 0]
+        # poly_real = [i for i in poly_options[0] if i != 0] + [-i for i in poly_options[0] if i != 0]
+        poly_real = [-i for i in poly_options[0] if i != 0]  # disable positive options for bn
         return product(poly_real, permutations)
 
     def get_function(self):

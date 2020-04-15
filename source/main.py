@@ -36,6 +36,8 @@ def get_custom_an_generator(args):
         return series_generators.CartesianProductAnShift1(), None
     elif args.polynomial_an:
         return series_generators.CartesianProductAnGenerator(), None
+    elif args.polynomial_an_odd:
+        return series_generators.CartesianProductAnOddOnly(), None
     else:
         return series_generators.CartesianProductAnGenerator(), None
 
@@ -55,6 +57,8 @@ def init_custom_an_generator_parser(parser):
                                      help=series_generators.CartesianProductAnShift1.help_string)
     custom_an_exclusive.add_argument('--polynomial_an', action='store_true',
                                      help=series_generators.CartesianProductAnGenerator.help_string)
+    custom_an_exclusive.add_argument('--polynomial_an_odd', action='store_true',
+                                     help=series_generators.CartesianProductAnOddOnly.help_string)
 
 
 def get_custom_bn_generator(args):
@@ -235,8 +239,10 @@ def enumerate_over_gcf_main(args):
     final_results = multi_core_enumeration_wrapper(
         sym_constant=sympy_consts,  # constant to run on
         lhs_search_limit=args.lhs_search_limit,
-        poly_a=[[i for i in range(args.poly_a_coefficient_max+1)]] * poly_a_order,  # a_n polynomial coefficients
-        poly_b=[[i for i in range(args.poly_b_coefficient_max+1)]] * poly_b_order,  # b_n polynomial coefficients
+        # poly_a=[[i for i in range(args.poly_a_coefficient_max+1)]] * poly_a_order,  # a_n polynomial coefficients
+        poly_a=[[3]] + [[i for i in range(args.poly_a_coefficient_max+1)]] * (poly_a_order-1),  # fix 3 in lead coefficient
+        # poly_b=[[i for i in range(args.poly_b_coefficient_max+1)]] * poly_b_order,  # b_n polynomial coefficients
+        poly_b=[[2]] * poly_b_order,  # fix |2| in all bn coefficients
         num_cores=args.num_of_cores,  # number of cores to run on
         manual_splits_size=None,  # use naive tiling
         saved_hash=os.path.join('hash_tables', hash_table_filename),  # if this doesn't exist, it will be created.
